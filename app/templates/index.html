@@ -1,0 +1,346 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        #input {
+            width: calc(100% - 22px);
+            font-size: 16px;
+            margin-top: 10px;
+            padding: 10px;
+            resize: none;
+            border: 1px solid #ccc;
+        }
+        #mic-button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #mic-button.recording {
+            background-color: #f44336; /* Red when recording */
+        }
+        #transcription {
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speech to Text</h1>
+    <button id="mic-button">🎤 Start Speaking</button>
+    <div id="transcription">Transcribed Text: <span id="transcribed-text"></span></div>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/speech/');
+        const micButton = document.getElementById('mic-button');
+        const messagesDiv = document.getElementById('messages');
+        const transcribedTextSpan = document.getElementById('transcribed-text');
+        const inputField = document.getElementById('input');
+        
+        let recognizing = false;
+        let speechRecognition = null;
+
+        socket.onopen = function() {
+            console.log('WebSocket connection established');
+        };
+
+        socket.onmessage = function(event) {
+            const transcription = event.data;
+            console.log('Received message:', transcription); 
+            
+            messagesDiv.innerHTML += `<p>${transcription}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; 
+
+            transcribedTextSpan.textContent += transcription + ' '; 
+            inputField.value += transcription + ' '; 
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket Error: ', error);
+        };
+
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed: ', event);
+        };
+
+        micButton.addEventListener('click', function() {
+            if (recognizing) {
+                stopRecognition();
+            } else {
+                startRecognition();
+            }
+        });
+
+        function startRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser does not support speech recognition. Please try Google Chrome.");
+                return;
+            }
+
+            speechRecognition = new webkitSpeechRecognition();
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = true;
+
+            speechRecognition.onstart = function() {
+                recognizing = true;
+                micButton.classList.add('recording');
+                micButton.textContent = '🛑 Stop Speaking';
+            };
+
+            speechRecognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                console.log('Current transcript:', transcript); 
+
+                transcribedTextSpan.textContent += transcript + ' '; 
+                inputField.value += transcript + ' '; 
+
+                if (event.results[event.results.length - 1].isFinal) {
+                    socket.send(transcript);
+                }
+            };
+
+            speechRecognition.onend = function() {
+                recognizing = false;
+                micButton.classList.remove('recording');
+                micButton.textContent = '🎤 Start Speaking';
+            };
+
+            speechRecognition.onerror = function(event) {
+                console.error('Speech recognition error', event);
+                stopRecognition(); 
+            };
+
+            speechRecognition.start();
+        }
+
+        function stopRecognition() {
+            if (speechRecognition) {
+                speechRecognition.stop();
+            }
+        }
+    </script>
+</body>
+</html>   -->
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #mic-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #mic-button.recording {
+            background-color: #f44336; /* Red when recording */
+        }
+        #transcription {
+            margin: 20px auto;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+        }
+        #input {
+            width: 90%;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #fff;
+            resize: none;
+            height: 100px; /* Fixed height for the input area */
+            overflow-y: auto; /* Scroll if content overflows */
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 500px;
+            overflow-y: auto;
+            background-color: #fff;
+            margin: 0 auto;
+            width: 90%;
+            border-radius: 5px;
+        }
+        #timer {
+            text-align: center;
+            font-size: 24px;
+            margin: 20px auto;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speech to Text</h1>
+    <div id="timer">00:00</div> <!-- Timer display -->
+    <button id="mic-button">🎤 Start Speaking</button>
+    <div id="transcription">Transcribed Text: <br><br><br>
+        
+    <div id="messages"><span id="transcribed-text"></span></div></div> 
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/speech/');
+        const micButton = document.getElementById('mic-button');
+        const messagesDiv = document.getElementById('messages');
+        const transcribedTextSpan = document.getElementById('transcribed-text');
+        const inputField = document.getElementById('input');
+        const timerDisplay = document.getElementById('timer');
+
+        let recognizing = false;
+        let speechRecognition = null;
+        let timerInterval = null;
+        let seconds = 0;
+
+        socket.onopen = function() {
+            console.log('WebSocket connection established');
+        };
+
+        socket.onmessage = function(event) {
+            const transcription = event.data;
+            console.log('Received message:', transcription); // Log to console
+            
+            // Update the messages div with real-time transcriptions
+            messagesDiv.innerHTML += `<p>${transcription}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+
+            // Update the displayed transcribed text
+            transcribedTextSpan.textContent += transcription + ' '; // Append transcribed text
+            inputField.value += transcription + ' '; // Append to the input field as well
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket Error: ', error);
+        };
+
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed: ', event);
+        };
+
+        micButton.addEventListener('click', function() {
+            if (recognizing) {
+                stopRecognition();
+            } else {
+                startRecognition();
+            }
+        });
+
+        function startRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Your browser does not support speech recognition. Please try Google Chrome.");
+                return;
+            }
+
+            speechRecognition = new webkitSpeechRecognition();
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = true;
+
+            speechRecognition.onstart = function() {
+                recognizing = true;
+                micButton.classList.add('recording');
+                micButton.textContent = '🛑 Stop Speaking';
+                startTimer(); // Start the timer
+            };
+
+            speechRecognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                console.log('Current transcript:', transcript); // Log current transcript
+
+                // Update the displayed transcribed text
+                transcribedTextSpan.textContent += transcript + ' '; // Append to the transcription display
+                inputField.value += transcript + ' '; // Append to the input field as well
+
+                // Send final transcript to WebSocket if it's final
+                if (event.results[event.results.length - 1].isFinal) {
+                    socket.send(transcript);
+                }
+            };
+
+            speechRecognition.onend = function() {
+                recognizing = false;
+                micButton.classList.remove('recording');
+                micButton.textContent = '🎤 Start Speaking';
+                stopTimer(); // Stop the timer
+            };
+
+            speechRecognition.onerror = function(event) {
+                console.error('Speech recognition error', event);
+                stopRecognition(); // Stop recognition if there’s an error
+            };
+
+            speechRecognition.start();
+        }
+
+        function stopRecognition() {
+            if (speechRecognition) {
+                speechRecognition.stop();
+            }
+        }
+
+        function startTimer() {
+            seconds = 0;
+            timerDisplay.textContent = "00:00"; // Reset timer display
+            timerInterval = setInterval(() => {
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

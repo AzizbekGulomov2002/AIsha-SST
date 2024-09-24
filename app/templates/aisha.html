@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text (STT)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+    * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.stt-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.recording-section {
+    width: 45%;
+    text-align: center;
+}
+
+.record-btn {
+    background-color: #4285F4;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.record-btn:hover {
+    background-color: #357ae8;
+}
+
+.mic-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.mic-circle {
+    width: 100px;
+    height: 100px;
+    background-color: #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.mic-icon {
+    font-size: 40px;
+    color: #6f42c1;
+}
+
+.timer {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.transcription-section {
+    width: 50%;
+}
+
+.transcription-section h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    resize: none;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #4285F4;
+    box-shadow: 0 0 5px rgba(66, 133, 244, 0.2);
+}
+
+</style>
+<body>
+    <div class="container">
+        <h1>Ovozdan matnga (STT)</h1>
+        <p class="description">O'zbek tilidagi audio materiallarni yuqori aniqlikda matnga aylantiradi</p>
+        
+        <div class="stt-section">
+            <div class="recording-section">
+                <button id="recordButton" class="record-btn">Ovoz yozish</button>
+                <p>Ovoz yozish uchun tugmani bosing</p>
+                <div class="mic-container">
+                    <div class="mic-circle">
+                        <i class="mic-icon">🎤</i>
+                    </div>
+                    <div class="timer">00:00</div>
+                </div>
+            </div>
+            <div class="transcription-section">
+                <h3>Transkripsiya natijasi</h3>
+                <textarea id="transcriptionResult" placeholder="Transkripsiya natijasi bu yerda paydo bo'ladi..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+<script>
+    // Initialize variables
+let recording = false;
+let timer;
+let seconds = 0;
+let minutes = 0;
+
+// Handle record button click
+document.getElementById('recordButton').addEventListener('click', () => {
+    recording = !recording;
+    if (recording) {
+        startRecording();
+    } else {
+        stopRecording();
+    }
+});
+
+// Start recording
+function startRecording() {
+    document.getElementById('recordButton').textContent = 'Yozishni to\'xtatish';
+    timer = setInterval(updateTimer, 1000);
+}
+
+// Stop recording
+function stopRecording() {
+    document.getElementById('recordButton').textContent = 'Ovoz yozish';
+    clearInterval(timer);
+    resetTimer();
+}
+
+// Update the timer
+function updateTimer() {
+    seconds++;
+    if (seconds === 60) {
+        minutes++;
+        seconds = 0;
+    }
+    document.querySelector('.timer').textContent = formatTime(minutes, seconds);
+}
+
+// Format the time (MM:SS)
+function formatTime(minutes, seconds) {
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+// Reset the timer
+function resetTimer() {
+    seconds = 0;
+    minutes = 0;
+    document.querySelector('.timer').textContent = '00:00';
+}
+
+</script>
